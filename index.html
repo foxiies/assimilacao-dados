@@ -86,7 +86,14 @@
     .dice-info {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+    }
+    /* Estilo para a imagem do dado exibida */
+    .dice-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 4px;
     }
     .btn-remove {
       background: #ef4444;
@@ -127,7 +134,11 @@
   <div id="results" class="results-bar"></div>
 
   <script>
-    // Mapeamento exato fornecido das faces dos dados
+    // Altere este caminho caso suas imagens estejam em uma pasta específica
+    // Exemplo: './imagens/' ou 'https://raw.githubusercontent.com/seu-usuario/seu-repo/main/'
+    const BASE_URL_IMAGENS = './';
+
+    // Mapeamento exato das faces dos dados
     const diceSymbols = {
       'D6': {
         1: 'Vazio',
@@ -164,6 +175,17 @@
         12: 'Coruja / Coruja'
       }
     };
+
+    // Função que retorna o nome do arquivo de imagem com base no tipo de dado e número sorteado
+    function getDiceImageName(type, faceNumber) {
+      if (faceNumber === 1 || faceNumber === 2) {
+        return `${type}_1_2.webp`;
+      }
+      if (faceNumber === 3 || faceNumber === 4) {
+        return `${type}_3_4.webp`;
+      }
+      return `${type}_${faceNumber}.webp`;
+    }
 
     let rolledDice = [];
 
@@ -212,14 +234,20 @@
         tag.className = 'dice-tag';
         
         const isVazio = d.symbol === 'Vazio';
+        const imageName = getDiceImageName(d.type, d.faceNumber);
+        const imagePath = `${BASE_URL_IMAGENS}${imageName}`;
+
         const symbolDisplay = isVazio 
-          ? `<span class="vazio-text">⚪ Vazio (sem face)</span>` 
+          ? `<span class="vazio-text">⚪ Vazio</span>` 
           : `<span>${d.symbol}</span>`;
 
         tag.innerHTML = `
           <div class="dice-info">
-            <strong style="color: var(--primary-hover);">${d.type}</strong>
-            ${symbolDisplay}
+            <img class="dice-img" src="${imagePath}" alt="${d.type} - ${d.symbol}" onerror="this.style.display='none'">
+            <div>
+              <strong style="color: var(--primary-hover);">${d.type}</strong>
+              <div style="font-size: 0.9rem;">${symbolDisplay}</div>
+            </div>
           </div>
           <button class="btn-remove" onclick="removeDice(${index})">✕</button>
         `;
