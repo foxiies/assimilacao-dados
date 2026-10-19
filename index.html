@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assimilação Dados</title>
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #111827;
+      --primary: #0D6E6E;
+      --primary-hover: #139494;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border: #1f2937;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      color: var(--primary-hover);
+      margin: 0 0 4px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 16px;
+      max-width: 400px;
+    }
+    button {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--primary);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-action {
+      background: #1f2937;
+      border-color: var(--border);
+    }
+    .btn-action:hover {
+      background: #374151;
+    }
+    .results-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .dice-tag {
+      background: var(--card-bg);
+      border: 1px solid var(--primary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1rem;
+    }
+    .dice-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-remove {
+      background: #ef4444;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    .btn-remove:hover {
+      background: #dc2626;
+    }
+    .vazio-text {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>Assimilação RPG</h1>
+    <span style="color: var(--text-muted); font-size: 0.85rem;">Rolador de Dados Simbólicos</span>
+  </div>
+
+  <div class="btn-bar">
+    <button class="btn-action" onclick="rerollAll()">Rolar Novamente</button>
+    <button class="btn-action" onclick="clearAll()">Limpar</button>
+  </div>
+
+  <div class="btn-bar">
+    <button onclick="rollDice('D6')">+ D6</button>
+    <button onclick="rollDice('D10')">+ D10</button>
+    <button onclick="rollDice('D12')">+ D12</button>
+  </div>
+
+  <div id="results" class="results-bar"></div>
+
+  <script>
+    // Mapeamento exato fornecido das faces dos dados
+    const diceSymbols = {
+      'D6': {
+        1: 'Vazio',
+        2: 'Vazio',
+        3: 'Coruja',
+        4: 'Coruja',
+        5: 'Cervo / Coruja',
+        6: 'Joaninha'
+      },
+      'D10': {
+        1: 'Vazio',
+        2: 'Vazio',
+        3: 'Coruja',
+        4: 'Coruja',
+        5: 'Cervo / Coruja',
+        6: 'Joaninha',
+        7: 'Joaninha / Joaninha',
+        8: 'Joaninha / Cervo',
+        9: 'Joaninha / Cervo / Coruja',
+        10: 'Joaninha / Joaninha / Coruja'
+      },
+      'D12': {
+        1: 'Vazio',
+        2: 'Vazio',
+        3: 'Coruja',
+        4: 'Coruja',
+        5: 'Cervo / Coruja',
+        6: 'Joaninha',
+        7: 'Joaninha / Joaninha',
+        8: 'Joaninha / Cervo',
+        9: 'Joaninha / Cervo / Coruja',
+        10: 'Joaninha / Joaninha / Coruja',
+        11: 'Joaninha / Cervo / Cervo / Coruja',
+        12: 'Coruja / Coruja'
+      }
+    };
+
+    let rolledDice = [];
+
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * max) + 1;
+    }
+
+    function rollDice(type) {
+      const maxSides = type === 'D6' ? 6 : (type === 'D10' ? 10 : 12);
+      const faceNumber = getRandomInt(maxSides);
+      const symbol = diceSymbols[type][faceNumber];
+      
+      rolledDice.push({ type, faceNumber, symbol });
+      updateUI();
+    }
+
+    function removeDice(index) {
+      rolledDice.splice(index, 1);
+      updateUI();
+    }
+
+    function clearAll() {
+      rolledDice = [];
+      updateUI();
+    }
+
+    function rerollAll() {
+      rolledDice = rolledDice.map(d => {
+        const maxSides = d.type === 'D6' ? 6 : (d.type === 'D10' ? 10 : 12);
+        const faceNumber = getRandomInt(maxSides);
+        return {
+          type: d.type,
+          faceNumber,
+          symbol: diceSymbols[d.type][faceNumber]
+        };
+      });
+      updateUI();
+    }
+
+    function updateUI() {
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = '';
+
+      rolledDice.forEach((d, index) => {
+        const tag = document.createElement('div');
+        tag.className = 'dice-tag';
+        
+        const isVazio = d.symbol === 'Vazio';
+        const symbolDisplay = isVazio 
+          ? `<span class="vazio-text">⚪ Vazio (sem face)</span>` 
+          : `<span>${d.symbol}</span>`;
+
+        tag.innerHTML = `
+          <div class="dice-info">
+            <strong style="color: var(--primary-hover);">${d.type}</strong>
+            ${symbolDisplay}
+          </div>
+          <button class="btn-remove" onclick="removeDice(${index})">✕</button>
+        `;
+        resultsContainer.appendChild(tag);
+      });
+    }
+  </script>
+
+</body>
+</html>
